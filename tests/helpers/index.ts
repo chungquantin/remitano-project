@@ -1,3 +1,4 @@
+import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { RemitanoProject } from "../../target/types/remitano_project";
 import RemitanoService from "../services/remitano.service";

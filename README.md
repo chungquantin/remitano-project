@@ -67,3 +67,15 @@ Update Anchor config file
 cluster = "testnet"
 wallet = "/Users/chungquantin/snf-1.json"
 ```
+### Create new liquidity Pool
+```js
+it("Is liquidity pool initialized!", async () => {
+  // Add your test here.
+  const name = "REMITANO_SAMPLE_POOL";
+  const createdPool = await createSamplePool(name);
+  const fetchedPool = await program.account.basicLiquidityPool.fetch(createdPool.poolKeypair.publicKey);
+  console.log("Fetched pool", fetchedPool);
+  assert.deepEqual(createdPool.pool.name, fetchedPool.name);
+  assert.isTrue(createdPool.pool.pool_provider.equals(fetchedPool.poolProvider));
+});
+```

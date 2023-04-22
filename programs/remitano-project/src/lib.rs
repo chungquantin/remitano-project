@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::{associated_token, token};
+use anchor_spl::token::{self, Mint, TokenAccount};
 
 // Declare program ID of Anchor smart contract
 declare_id!("Cb95wqzowAjpuRi2yRoo9agiko6c5g3eTAWammsWwC1h");
@@ -46,7 +46,7 @@ pub fn initialize_pool_handler(
 pub fn swap_token_handler(ctx: Context<SwapInstructionParams>, amount: u64) -> Result<()> {
     let pool: &Account<BasicLiquidityPool> = &ctx.accounts.pool;
     let pool_key = &pool.key();
-    // Transfer SOL to the pool
+    // Transfer SOL native from payer to liquidity pool
     anchor_lang::solana_program::system_instruction::transfer(
         &ctx.accounts.payer.key(),
         pool_key,
@@ -58,25 +58,33 @@ pub fn swap_token_handler(ctx: Context<SwapInstructionParams>, amount: u64) -> R
         &[pool.signer_bump],
     ];
     let signer = &[&pool_seeds[..]];
-    // Transfer 10 MOVE token back to the swapper
+    // Transfer 10 registered SPL token back to the swapper
     let cpi_context = CpiContext::new_with_signer(
         ctx.accounts.token_program.to_account_info(),
         token::Transfer {
-            from: ctx.accounts.pool.to_account_info(),
-            to: ctx.accounts.payer.to_account_info(),
+            // Source token account of the liquidity pool
+            from: ctx.accounts.source_token_account.to_account_info(),
+            // Destination token account of the user wallet
+            to: ctx.accounts.dest_token_account.to_account_info(),
+            // Authority is a pool signer
             authority: ctx.accounts.pool_authority.to_account_info(),
         },
         signer,
     );
+
+    let token_received: u64 = 10; // 10 tokens = 1 SOL
+    let relative_amount: u64 = token_received * amount;
     // Cross-program invocation on the swap transaction, signed by the pool authority
-    token::transfer(cpi_context, 10)?;
+    token::transfer(cpi_context, relative_amount)?;
     msg!("Transferred successfully.");
     Ok(())
 }
 
 #[account]
 #[derive(Default, Debug)]
-/** BasicLiquidityPool implementation: Liquidity Pool holds token assets */
+/** BasicLiquidityPool implementation: Liquidity Pool holds token assets
+ * The pool is designed for swapping between native SOL <> SPL Token
+ */
 pub struct BasicLiquidityPool {
     pub name: String,
     pub created_at: i64,
@@ -107,7 +115,7 @@ pub struct InitializePoolInstructionParams<'info> {
             POOL_LIQUIDITY_PREFIX.as_ref(),
             pool.key().as_ref()
         ],
-        bump = pool.signer_bump
+        bump = client_pool.signer_bump
     )]
     pub pool_authority: AccountInfo<'info>,
 
@@ -115,7 +123,6 @@ pub struct InitializePoolInstructionParams<'info> {
     payer: Signer<'info>,
 
     pub system_program: Program<'info, System>,
-    pub token_program: Program<'info, token::Token>,
 }
 
 #[derive(Accounts)]
@@ -137,7 +144,13 @@ pub struct SwapInstructionParams<'info> {
     #[account(mut)]
     payer: Signer<'info>,
 
+    /// CHECK: Just a source token account
+    #[account(mut)]
+    pub source_token_account: Account<'info, TokenAccount>,
+    /// CHECK: Just a destination token account
+    #[account(mut)]
+    pub dest_token_account: Account<'info, Mint>,
+
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, token::Token>,
-    pub associated_token_program: Program<'info, associated_token::AssociatedToken>,
 }

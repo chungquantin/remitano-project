@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.27.0",
+    "@solana/spl-token": "^0.3.7",
     "@solana/web3.js": "^1.75.0",
     "loglevel": "^1.8.1"
   },
