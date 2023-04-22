@@ -1,4 +1,5 @@
 # Blockchain Developer Project
+- Candidate name: Tin Chung
 
 ## Project Description
 
@@ -10,8 +11,8 @@ Once you have completed the application, please deploy it to Solana testnet, upl
 https://remi.group/project-blockchain-submission
 
 ### Required Features:
-
-- [ ] Create a new token on Solana testnet, for example, MOVE token.
+The implementation steps are covered in the below section
+- [x] Create a new token on Solana testnet, for example, MOVE token.
 - [ ] Create a smart contract to swap SOL to MOVE token, for each SOL swapped we will receive 10 MOVE (the price is a constant).
 - [ ] Create a UI to swap or create a script to execute to send swap transaction to Solana testnet
 
@@ -20,6 +21,13 @@ https://remi.group/project-blockchain-submission
 - [ ] Use Git and commit often
 - [ ] Have unit test for that contract
 - [ ] Smart contract have to be deployed to Solana testnet and execute successfully
+
+## Submission Checklist
+
+- [x] Smart contract have to be Solana testnet
+
+* Smart contract address: `Cb95wqzowAjpuRi2yRoo9agiko6c5g3eTAWammsWwC1h`
+* Testnet URL: https://explorer.solana.com/address/Cb95wqzowAjpuRi2yRoo9agiko6c5g3eTAWammsWwC1h?cluster=testnet
 
 ## Implementation
 
@@ -51,31 +59,43 @@ Using SPL token CLI to create and mint new token
 1030  spl-token create-account 3trVWdP5LcofWPB6QzEzJjiMd3pwTNmLZRzijfJjWsV1 10000
 1031  spl-token mint 3trVWdP5LcofWPB6QzEzJjiMd3pwTNmLZRzijfJjWsV1 10000
 ```
+
 ### Test Anchor program
+
 ```
 anchor test
 ```
+
 ### Deploy to Testnet
+
 ```
 solana config set --url testnet
 solana airdrop 1
 anchor deploy
 ```
+
 Update Anchor config file
+
 ```toml
 [provider]
 cluster = "testnet"
 wallet = "/Users/chungquantin/snf-1.json"
 ```
+
 ### Create new liquidity Pool
+
 ```js
 it("Is liquidity pool initialized!", async () => {
   // Add your test here.
   const name = "REMITANO_SAMPLE_POOL";
   const createdPool = await createSamplePool(name);
-  const fetchedPool = await program.account.basicLiquidityPool.fetch(createdPool.poolKeypair.publicKey);
+  const fetchedPool = await program.account.basicLiquidityPool.fetch(
+    createdPool.poolKeypair.publicKey
+  );
   console.log("Fetched pool", fetchedPool);
   assert.deepEqual(createdPool.pool.name, fetchedPool.name);
-  assert.isTrue(createdPool.pool.pool_provider.equals(fetchedPool.poolProvider));
+  assert.isTrue(
+    createdPool.pool.pool_provider.equals(fetchedPool.poolProvider)
+  );
 });
 ```
