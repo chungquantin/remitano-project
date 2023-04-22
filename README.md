@@ -51,3 +51,19 @@ Using SPL token CLI to create and mint new token
 1030  spl-token create-account 3trVWdP5LcofWPB6QzEzJjiMd3pwTNmLZRzijfJjWsV1 10000
 1031  spl-token mint 3trVWdP5LcofWPB6QzEzJjiMd3pwTNmLZRzijfJjWsV1 10000
 ```
+### Test Anchor program
+```
+anchor test
+```
+### Deploy to Testnet
+```
+solana config set --url testnet
+solana airdrop 1
+anchor deploy
+```
+Update Anchor config file
+```toml
+[provider]
+cluster = "testnet"
+wallet = "/Users/chungquantin/snf-1.json"
+```

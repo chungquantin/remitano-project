@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::{associated_token, token};
 
 // Declare program ID of Anchor smart contract
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("Cb95wqzowAjpuRi2yRoo9agiko6c5g3eTAWammsWwC1h");
 
 // Constant seed prefix to intialize pool liquidity
 pub const POOL_LIQUIDITY_PREFIX: &[u8; 14] = b"POOL_LIQUIDITY";
@@ -20,7 +20,7 @@ pub mod remitano_project {
     }
 
     /** Swap Instruction: Amount is lamport unit */
-    pub fn swap(ctx: Context<SwapInstructionParams>, amount: u64) -> Result<()> {
+    pub fn swap_token(ctx: Context<SwapInstructionParams>, amount: u64) -> Result<()> {
         swap_token_handler(ctx, amount)
     }
 }
