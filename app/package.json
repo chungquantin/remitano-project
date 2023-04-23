@@ -25,7 +25,10 @@
         "start": "parcel src/index.html"
     },
     "dependencies": {
+        "@coral-xyz/anchor": "^0.27.0",
+        "@project-serum/borsh": "^0.2.5",
         "@solana/buffer-layout": "^4.0.1",
+        "@solana/spl-token": "^0.3.7",
         "@solana/wallet-adapter-base": "^0.9.22",
         "@solana/wallet-adapter-react": "^0.15.30",
         "@solana/wallet-adapter-react-ui": "^0.9.29",
