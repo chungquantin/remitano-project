@@ -5,8 +5,9 @@ import { UnsafeBurnerWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
 import type { FC, ReactNode } from 'react';
 import React, { useMemo } from 'react';
-import { Button, Card } from 'antd';
+import { Button, Card, Tag } from 'antd';
 import { useLiquidityPool } from './hooks';
+import { REMITANO_PROJECT_ID } from './constants';
 
 export const App: FC = () => {
     return (
@@ -33,19 +34,21 @@ const Context: FC<{ children: ReactNode }> = ({ children }) => {
 
 const Content: FC = () => {
     const { wallet } = useWallet();
-    useLiquidityPool();
+    const {pools, loading} = useLiquidityPool();
     const requestSolAirdrop = () => {};
 
     return (
-        <div>
+        <div style={{display: "flex", justifyContent: "center", flexDirection: "column"}}>
             <WalletMultiButton />
             <div style={{ marginTop: 10 }}>
-                {wallet ? (
+                {!wallet ? (
                     <React.Fragment>Please connect to your wallet first</React.Fragment>
                 ) : (
                     <React.Fragment>
+                        <Tag>Endpoint: {clusterApiUrl("testnet")}</Tag>
+                        <Tag>Contract address: {REMITANO_PROJECT_ID.toString()}</Tag>
                         <Button onClick={requestSolAirdrop}>Request 1 SOL airdrop</Button>
-                        <Card title="Liquidity Pool"></Card>
+                        <Card style={{marginTop: 20}} title="Liquidity Pool"></Card>
                     </React.Fragment>
                 )}
             </div>

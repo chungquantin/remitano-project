@@ -59,8 +59,9 @@ export const createSamplePool = async (name: string) => {
     .accounts(poolData.ctx.accounts)
     .signers([poolData.poolKeypair])
     .rpc();
-
+  
   console.log("Your transaction signature", tx);
+  console.log("Successfully create pool ", poolData.poolKeypair.publicKey.toString());
   return poolData;
 };
 

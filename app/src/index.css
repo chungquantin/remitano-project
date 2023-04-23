@@ -1,8 +1,9 @@
 @import './reset.css';
 
-html, body {
-    background-color: #303030;
-    color: #FFFFFF;
+html,
+body {
+    background-color: #ffffff;
+    color: #000000;
 }
 
 #app {

@@ -6,7 +6,7 @@ import { AnchorWallet, useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Program } from '@coral-xyz/anchor';
 import { REMITANO_PROJECT_ID } from '../constants';
 
-export function useAnchorProgram(): Program | undefined {
+export function useAnchorProgram(): { anchorProgram: Program | undefined; connection: Connection } {
     const connection: Connection = new Connection(clusterApiUrl('testnet'));
     const walletCtx = useAnchorWallet();
 
@@ -14,7 +14,7 @@ export function useAnchorProgram(): Program | undefined {
         return walletCtx ? initAnchorProgram(connection, walletCtx) : undefined;
     }, [walletCtx?.publicKey]);
 
-    return anchorProgram;
+    return { anchorProgram, connection };
 }
 
 function initAnchorProgram(connection: Connection, walletCtx: AnchorWallet): Program {
