@@ -28,6 +28,12 @@ The implementation steps are covered in the below section
 * Mint authority: `BxUeMg5etjmiDX25gbGi2pn1MyzkcQx3ZCCiUifTUhyj`
 * Supply: `10,030,000,000` (decimals: 9)
 
+- [x] Have unit test for that contract
+
+Link to test folder: https://github.com/chungquantin/remitano-project/blob/master/tests/remitano-project.spec.ts
+
+To run the test: `npm run test` or `anchor test` in the root directory
+
 - [x] Create a UI to swap or create a script to execute to send swap transaction to Solana testnet
 * Deployed URL: https://remitano-project.netlify.app/
 <img width="1440" alt="Screen Shot 2023-04-23 at 07 48 22" src="https://user-images.githubusercontent.com/56880684/233837922-cbda186c-0d4f-4ab0-a15a-c2acc2fbf3df.png">
@@ -106,5 +112,32 @@ it("Is liquidity pool initialized!", async () => {
   assert.isTrue(
     createdPool.pool.pool_provider.equals(fetchedPool.poolProvider)
   );
+});
+```
+### Swap token SOL <> Test token
+
+```tsx
+it("Swap token", async () => {
+   // Expected outcome: newAccount receives 1 test token, swap 1 SOL
+   const { swapTokenData, transaction } = await remitanoService.swapToken(
+     anchorProvider.wallet.publicKey,
+     anchorProvider.wallet.publicKey,
+     poolAddress,
+     MINT_TOKEN_ADDRESS,
+     new BN(LAMPORTS_PER_SOL * 1)
+   );
+
+   const swapIx = await program.methods
+     .swapToken(swapTokenData.amount)
+     .accounts(swapTokenData.ctx.accounts)
+     .signers([])
+     .instruction();
+
+   transaction.instructions.push(swapIx);
+
+   console.log(transaction.instructions);
+
+   const tx = await anchorProvider.sendAndConfirm(transaction, []);
+   console.log("Your transaction signature", tx);
 });
 ```
