@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_lang::system_program;
+use anchor_lang::{system_program};
 use anchor_spl::token::{self, TokenAccount};
 
 // Declare program ID of Anchor smart contract
@@ -73,17 +73,22 @@ pub fn transfer_sol_with_cpi(ctx: TransferSolWithCpi, amount: u64) -> Result<()>
 pub fn swap_token_handler(ctx: Context<SwapInstructionParams>, amount: u64) -> Result<()> {
     let pool: &Account<BasicLiquidityPool> = &ctx.accounts.pool;
     let pool_key = &pool.key();
-    // Transfer SOL native from payer to liquidity pool
-    system_program::transfer(
-        CpiContext::new(
-            ctx.accounts.system_program.to_account_info(),
-            system_program::Transfer {
-                from: ctx.accounts.sender.to_account_info(),
-                to: ctx.accounts.pool.to_account_info(),
-            },
-        ),
-        amount,
-    )?;
+
+    // ERROR: SystemProgram.transfer on client side works so go with that option
+    // let transfer_ix = solana_program::system_instruction::transfer(
+    //     &ctx.accounts.sender.key(),
+    //     &ctx.accounts.pool_authority.key(),
+    //     amount,
+    // );
+
+    // solana_program::program::invoke(
+    //     &transfer_ix,
+    //     &[
+    //         ctx.accounts.sender.to_account_info(),
+    //         ctx.accounts.pool_authority.to_account_info(),
+    //         ctx.accounts.system_program.to_account_info(),
+    //     ],
+    // )?;
 
     let pool_seeds = &[
         POOL_LIQUIDITY_PREFIX.as_ref(),

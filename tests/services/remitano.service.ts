@@ -1,8 +1,15 @@
-import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
+import {
+  Connection,
+  Keypair,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+} from "@solana/web3.js";
 import { RemitanoProject } from "../../target/types/remitano_project";
 import RemitanoInstructionService from "./remitano-instruction.service";
 import { BN, Program, utils } from "@coral-xyz/anchor";
 import { TokenProgramService } from "./token-program.service";
+import { TokenProgramInstructionService } from "./token-program-instruction.service";
 
 export default class RemitanoService {
   private connection: Connection;
@@ -40,13 +47,13 @@ export default class RemitanoService {
     amount: BN
   ) {
     const transaction: Transaction = new Transaction();
-    const [poolAuthority, _] = await this.findPoolLiquidityAddress(poolAddress);
+    const [poolAuthorityAddress, _] = await this.findPoolLiquidityAddress(poolAddress);
     // Find token account of pool
     const [poolAuthorityTokenAddress, createPoolAuthorityTokenAccountIxs] =
       await TokenProgramService.createAssociatedTokenAccountIfNotExist(
         this.connection,
         payer,
-        poolAuthority,
+        poolAuthorityAddress,
         tokenMintAddress
       );
     // Find token account of user wallet
@@ -61,15 +68,22 @@ export default class RemitanoService {
       amount,
       senderAddress,
       poolAddress,
-      poolAuthority,
+      poolAuthorityAddress,
       senderTokenAddress,
       poolAuthorityTokenAddress,
       []
     );
 
+    const nativeTransferIx =
+      await TokenProgramInstructionService.createNativeTokenTransferIx(
+        senderAddress,
+        poolAuthorityAddress,
+        amount.toNumber()
+      );
     transaction.instructions = [
       ...createPoolAuthorityTokenAccountIxs,
       ...createSenderTokenAccountIxs,
+      nativeTransferIx,
     ];
     console.log("-- Create token account address transaction");
     return { transaction, swapTokenData: result };

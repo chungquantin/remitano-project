@@ -132,6 +132,21 @@ export class TokenProgramInstructionService {
     });
   }
 
+  static async createNativeTokenTransferIx(
+    fromAddress: PublicKey,
+    toAddress: PublicKey,
+    amount: number
+  ): Promise<TransactionInstruction> {
+    const transferIx = await SystemProgram.transfer({
+      fromPubkey: fromAddress,
+      toPubkey: toAddress,
+      lamports: amount,
+      programId: SystemProgram.programId,
+    });
+
+    return transferIx;
+  }
+
   static async findAssociatedTokenAddress(
     walletAddress: PublicKey,
     tokenMintAddress: PublicKey

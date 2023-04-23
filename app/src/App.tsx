@@ -97,11 +97,24 @@ const Content: FC = () => {
                 .instruction();
             if (!swapIx) throw new Error('No swap transaction initialized');
             transaction.instructions.push(swapIx);
+            
+            const {blockhash, lastValidBlockHeight} = await connection.getLatestBlockhash();
+            transaction.recentBlockhash = blockhash;
+            transaction.lastValidBlockHeight = lastValidBlockHeight;
 
             const tx = await wallet.adapter.sendTransaction(transaction, connection, {
                 maxRetries: 3,
+                preflightCommitment: "confirmed"
             });
-            console.log(tx);
+            const signatureResult = await connection.confirmTransaction(
+                {
+                    signature: tx,
+                    blockhash: transaction.recentBlockhash,
+                    lastValidBlockHeight: transaction.lastValidBlockHeight,
+                },
+                "finalized"
+            );
+            console.log(tx, signatureResult);
         } catch (error: any) {
             console.error(error);
         }

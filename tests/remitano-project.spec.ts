@@ -123,49 +123,10 @@ describe("remitano-project", () => {
 
   if (tests.swapToken) {
     it("Swap token", async () => {
-      /** Initialize new account for testing */
-      const newAccount = Keypair.generate();
-      const minimumLamport = await getMinimumBalanceForRentExemptAccount(
-        connection
-      );
-      const createAccountTx = new Transaction();
-      createAccountTx.instructions = [
-        SystemProgram.createAccount({
-          fromPubkey: anchorProvider.publicKey,
-          newAccountPubkey: newAccount.publicKey,
-          space: ACCOUNT_SIZE,
-          lamports: minimumLamport,
-          programId: SystemProgram.programId,
-        }),
-      ];
-
-      const createAccountTxSig = await anchorProvider.sendAndConfirm(
-        createAccountTx,
-        [newAccount]
-      );
-      console.log("-- Create new account ", createAccountTxSig);
-      // Create a transaction to fund test sol to newAccount
-      const sol = LAMPORTS_PER_SOL * 2;
-      const signature = await connection.requestAirdrop(
-        newAccount.publicKey,
-        sol
-      );
-      const { blockhash, lastValidBlockHeight } =
-        await connection.getLatestBlockhash();
-      // Confirm and send transaction
-      await connection.confirmTransaction(
-        {
-          blockhash,
-          lastValidBlockHeight,
-          signature,
-        },
-        "finalized"
-      );
-      console.log(`Airdrop ${sol} to the new account ${newAccount.publicKey}`);
       // Expected outcome: newAccount receives 1 test token, swap 1 SOL
       const { swapTokenData, transaction } = await remitanoService.swapToken(
         anchorProvider.wallet.publicKey,
-        newAccount.publicKey,
+        anchorProvider.wallet.publicKey,
         poolAddress,
         MINT_TOKEN_ADDRESS,
         new BN(LAMPORTS_PER_SOL * 1)
@@ -174,14 +135,14 @@ describe("remitano-project", () => {
       const swapIx = await program.methods
         .swapToken(swapTokenData.amount)
         .accounts(swapTokenData.ctx.accounts)
-        .signers([newAccount])
+        .signers([])
         .instruction();
 
       transaction.instructions.push(swapIx);
 
       console.log(transaction.instructions);
 
-      const tx = await anchorProvider.sendAndConfirm(transaction, [newAccount]);
+      const tx = await anchorProvider.sendAndConfirm(transaction, []);
       console.log("Your transaction signature", tx);
     });
   }

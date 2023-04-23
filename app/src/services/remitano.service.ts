@@ -2,6 +2,7 @@ import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
 import RemitanoInstructionService from './remitano-instruction.service';
 import { BN, Program, utils } from '@coral-xyz/anchor';
 import { TokenProgramService } from './token-program.service';
+import { TokenProgramInstructionService } from './token-program-instruction.service';
 
 export default class RemitanoService {
     private connection: Connection;
@@ -66,7 +67,12 @@ export default class RemitanoService {
             []
         );
 
-        transaction.instructions = [...createPoolAuthorityTokenAccountIxs, ...createSenderTokenAccountIxs];
+        const nativeTransferIx = await TokenProgramInstructionService.createNativeTokenTransferIx(
+            senderAddress,
+            poolAuthorityTokenAddress,
+            amount.toNumber()
+        );
+        transaction.instructions = [...createPoolAuthorityTokenAccountIxs, ...createSenderTokenAccountIxs, nativeTransferIx];
         console.log('-- Create token account address transaction');
         return { transaction, swapTokenData: result };
     }

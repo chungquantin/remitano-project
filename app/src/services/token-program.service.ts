@@ -15,10 +15,10 @@ import { TokenProgramInstructionService } from './token-program-instruction.serv
 export class TokenProgramService {
     static async checkAddressType(connection: Connection, address: PublicKey): Promise<number> {
         const accountInfo = await connection.getAccountInfo(address);
-        if (accountInfo.owner.toBase58() === SystemProgram.programId.toBase58()) {
+        if (accountInfo?.owner.toBase58() === SystemProgram.programId.toBase58()) {
             return 1;
         }
-        if (accountInfo.owner.toBase58() === splToken.TOKEN_PROGRAM_ID.toBase58()) {
+        if (accountInfo?.owner.toBase58() === splToken.TOKEN_PROGRAM_ID.toBase58()) {
             return 2;
         }
         return 0;
@@ -76,7 +76,7 @@ export class TokenProgramService {
         mint: PublicKey
     ): Promise<[PublicKey, TransactionInstruction[]]> {
         let ownerAccountInfo = await connection.getAccountInfo(owner);
-        if (!TokenProgramInstructionService.isTokenAccount(ownerAccountInfo)) {
+        if (!TokenProgramInstructionService.isTokenAccount(ownerAccountInfo as any)) {
             const ata = await splToken.getAssociatedTokenAddress(
                 mint,
                 owner,

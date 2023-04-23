@@ -127,6 +127,21 @@ export class TokenProgramInstructionService {
         );
         return address;
     }
+
+    static async createNativeTokenTransferIx(
+        fromAddress: PublicKey,
+        toAddress: PublicKey,
+        amount: number
+    ): Promise<TransactionInstruction> {
+        const transferIx = await SystemProgram.transfer({
+            fromPubkey: fromAddress,
+            toPubkey: toAddress,
+            lamports: amount,
+            programId: SystemProgram.programId,
+        });
+
+        return transferIx;
+    }
 }
 
 export class AuthorityTypes {
