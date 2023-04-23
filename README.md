@@ -1,5 +1,4 @@
-# Blockchain Developer Project
-- Candidate name: Tin Chung
+# Remitano Project
 
 ## Project Description
 
