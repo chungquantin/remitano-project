@@ -6,6 +6,12 @@
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
     "prog:build": "anchor build"
   },
+  "workspaces": {
+    "packages": [
+      "app/*",
+      "tests/*"
+    ]
+  },
   "dependencies": {
     "@coral-xyz/anchor": "^0.27.0",
     "@solana/spl-token": "^0.3.7",

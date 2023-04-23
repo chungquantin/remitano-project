@@ -3,10 +3,21 @@ import { assert } from "chai";
 import { Program } from "@coral-xyz/anchor";
 import { RemitanoProject } from "../target/types/remitano_project";
 import { anchorProvider, remitanoService } from "./helpers";
-import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import {
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+} from "@solana/web3.js";
 import { TokenProgramService } from "./services/token-program.service";
 import { BN } from "bn.js";
 import { getTestAccount } from "./constants";
+import {
+  ACCOUNT_SIZE,
+  getMinimumBalanceForRentExemptAccount,
+} from "@solana/spl-token";
+import RemitanoService from "./services/remitano.service";
 
 // Configure the client to use the local cluster.
 anchor.setProvider(anchor.AnchorProvider.env());
@@ -34,7 +45,7 @@ const tests = {
   validateHardCodedVar: true,
   initializeLiquidityPool: true,
   fundLiquidityPool: true,
-  swapToken: false,
+  swapToken: true,
 };
 
 export const createSamplePool = async (name: string) => {
@@ -48,6 +59,7 @@ export const createSamplePool = async (name: string) => {
     .accounts(poolData.ctx.accounts)
     .signers([poolData.poolKeypair])
     .rpc();
+
   console.log("Your transaction signature", tx);
   return poolData;
 };
@@ -87,26 +99,52 @@ describe("remitano-project", () => {
 
   if (tests.fundLiquidityPool) {
     it("Fund liquidity pool", async () => {
-      assert.isTrue(
-        await TokenProgramService.transfer(
-          connection,
-          anchorProvider.wallet.publicKey,
-          testAccount,
-          poolAddress,
-          MINT_TOKEN_ADDRESS,
-          new BN(100)
-        )
+      const [poolAuthorityAddress] = await new RemitanoService(
+        program
+      ).findPoolLiquidityAddress(poolAddress);
+      const transferTx = await TokenProgramService.createTransferTransaction(
+        connection,
+        anchorProvider.wallet.publicKey,
+        testAccount,
+        poolAuthorityAddress,
+        MINT_TOKEN_ADDRESS,
+        new BN(20 * LAMPORTS_PER_SOL)
       );
+      const txSig = await anchorProvider.sendAndConfirm(transferTx, [
+        testAccount,
+      ]);
+      console.log("Your transaction signature", txSig);
     });
   }
 
   if (tests.swapToken) {
     it("Swap token", async () => {
+      /** Initialize new account for testing */
       const newAccount = Keypair.generate();
+      const minimumLamport = await getMinimumBalanceForRentExemptAccount(
+        connection
+      );
+      const createAccountTx = new Transaction();
+      createAccountTx.instructions = [
+        SystemProgram.createAccount({
+          fromPubkey: anchorProvider.publicKey,
+          newAccountPubkey: newAccount.publicKey,
+          space: ACCOUNT_SIZE,
+          lamports: minimumLamport,
+          programId: SystemProgram.programId,
+        }),
+      ];
+
+      const createAccountTxSig = await anchorProvider.sendAndConfirm(
+        createAccountTx,
+        [newAccount]
+      );
+      console.log("-- Create new account ", createAccountTxSig);
       // Create a transaction to fund test sol to newAccount
+      const sol = LAMPORTS_PER_SOL * 2;
       const signature = await connection.requestAirdrop(
         newAccount.publicKey,
-        LAMPORTS_PER_SOL * 2
+        sol
       );
       const { blockhash, lastValidBlockHeight } =
         await connection.getLatestBlockhash();
@@ -119,19 +157,27 @@ describe("remitano-project", () => {
         },
         "finalized"
       );
-      // Expected outcome: newAccount receives 5 test token
-      const swapTokenData = await remitanoService.swapToken(
+      console.log(`Airdrop ${sol} to the new account ${newAccount.publicKey}`);
+      // Expected outcome: newAccount receives 1 test token, swap 1 SOL
+      const { swapTokenData, transaction } = await remitanoService.swapToken(
+        anchorProvider.wallet.publicKey,
         newAccount.publicKey,
         poolAddress,
         MINT_TOKEN_ADDRESS,
-        new BN(1)
+        new BN(LAMPORTS_PER_SOL * 1)
       );
 
-      const tx = await program.methods
+      const swapIx = await program.methods
         .swapToken(swapTokenData.amount)
         .accounts(swapTokenData.ctx.accounts)
         .signers([newAccount])
-        .rpc();
+        .instruction();
+
+      transaction.instructions.push(swapIx);
+
+      console.log(transaction.instructions);
+
+      const tx = await anchorProvider.sendAndConfirm(transaction, [newAccount]);
       console.log("Your transaction signature", tx);
     });
   }

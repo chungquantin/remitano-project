@@ -1,10 +1,11 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Mint, TokenAccount};
+use anchor_spl::token::{self, TokenAccount};
 
 // Declare program ID of Anchor smart contract
 declare_id!("Cb95wqzowAjpuRi2yRoo9agiko6c5g3eTAWammsWwC1h");
 
 // Constant seed prefix to intialize pool liquidity
+pub const LAMPORTS_PER_SOL : u64 = 1000000000;
 pub const POOL_LIQUIDITY_PREFIX: &[u8; 14] = b"POOL_LIQUIDITY";
 pub const POOL_MAX_NAME_LENGTH: u8 = 32;
 
@@ -48,7 +49,7 @@ pub fn swap_token_handler(ctx: Context<SwapInstructionParams>, amount: u64) -> R
     let pool_key = &pool.key();
     // Transfer SOL native from payer to liquidity pool
     anchor_lang::solana_program::system_instruction::transfer(
-        &ctx.accounts.payer.key(),
+        &ctx.accounts.sender.key(),
         pool_key,
         amount,
     );
@@ -63,17 +64,18 @@ pub fn swap_token_handler(ctx: Context<SwapInstructionParams>, amount: u64) -> R
         ctx.accounts.token_program.to_account_info(),
         token::Transfer {
             // Source token account of the liquidity pool
-            from: ctx.accounts.source_token_account.to_account_info(),
+            from: ctx.accounts.pool_token_account.to_account_info(),
             // Destination token account of the user wallet
-            to: ctx.accounts.dest_token_account.to_account_info(),
+            to: ctx.accounts.sender_token_account.to_account_info(),
             // Authority is a pool signer
             authority: ctx.accounts.pool_authority.to_account_info(),
         },
         signer,
     );
 
-    let token_received: u64 = 10; // 10 tokens = 1 SOL
+    let token_received: u64 = 10; // 10 tokens = 1 SOL, the token has the same decimals compared to SOL
     let relative_amount: u64 = token_received * amount;
+    println!("Total number of token received {:?}", relative_amount);
     // Cross-program invocation on the swap transaction, signed by the pool authority
     token::transfer(cpi_context, relative_amount)?;
     msg!("Transferred successfully.");
@@ -142,14 +144,14 @@ pub struct SwapInstructionParams<'info> {
     pub pool_authority: AccountInfo<'info>,
 
     #[account(mut)]
-    payer: Signer<'info>,
+    pub sender: Signer<'info>,
 
     /// CHECK: Just a source token account
     #[account(mut)]
-    pub source_token_account: Account<'info, TokenAccount>,
+    pub sender_token_account: Account<'info, TokenAccount>,
     /// CHECK: Just a destination token account
     #[account(mut)]
-    pub dest_token_account: Account<'info, Mint>,
+    pub pool_token_account: Account<'info, TokenAccount>,
 
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, token::Token>,
