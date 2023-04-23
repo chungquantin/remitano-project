@@ -13,4 +13,4 @@ export const getTestAccount = () => ({
 
 export const MINT_TOKEN_ADDRESS = new PublicKey('CM2Tb1iNhLsyPRaq43tFNSaQMW7N7Qx2R6ZypacCqM7S');
 export const REMITANO_PROJECT_ID = new PublicKey('Cb95wqzowAjpuRi2yRoo9agiko6c5g3eTAWammsWwC1h');
-export const MOCK_POOL = new PublicKey("BATpa5CAkTVxbAk7sMNx4JgpRC6gh41ToL78RFHkyLHU");
+export const MOCK_POOL = new PublicKey('BATpa5CAkTVxbAk7sMNx4JgpRC6gh41ToL78RFHkyLHU');

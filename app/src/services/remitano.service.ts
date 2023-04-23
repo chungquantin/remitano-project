@@ -6,8 +6,8 @@ import { TokenProgramService } from './token-program.service';
 export default class RemitanoService {
     private connection: Connection;
 
-    constructor(readonly program: Program<any>) {
-        this.connection = program.provider.connection;
+    constructor(readonly program: Program<any>, connection: Connection) {
+        this.connection = program?.provider?.connection || connection;
     }
     async createLiquidityPool(payer: PublicKey, name: string) {
         const poolKeypair = Keypair.generate();
@@ -55,6 +55,7 @@ export default class RemitanoService {
                 senderAddress,
                 tokenMintAddress
             );
+        console.log("Swapped: " ,amount.toNumber());
         const result = await RemitanoInstructionService.swapToken(
             amount,
             senderAddress,

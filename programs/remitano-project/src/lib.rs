@@ -1,11 +1,12 @@
 use anchor_lang::prelude::*;
+use anchor_lang::system_program;
 use anchor_spl::token::{self, TokenAccount};
 
 // Declare program ID of Anchor smart contract
 declare_id!("Cb95wqzowAjpuRi2yRoo9agiko6c5g3eTAWammsWwC1h");
 
 // Constant seed prefix to intialize pool liquidity
-pub const LAMPORTS_PER_SOL : u64 = 1000000000;
+pub const LAMPORTS_PER_SOL: u64 = 1000000000;
 pub const POOL_LIQUIDITY_PREFIX: &[u8; 14] = b"POOL_LIQUIDITY";
 pub const POOL_MAX_NAME_LENGTH: u8 = 32;
 
@@ -43,16 +44,47 @@ pub fn initialize_pool_handler(
     Ok(())
 }
 
+#[derive(Accounts)]
+pub struct TransferSolWithCpi<'info> {
+    // CHEKC safe
+    #[account(mut)]
+    recipient: AccountInfo<'info>,
+    #[account(mut)]
+    payer: Signer<'info>,
+    system_program: Program<'info, System>,
+}
+
+pub fn transfer_sol_with_cpi(ctx: TransferSolWithCpi, amount: u64) -> Result<()> {
+    system_program::transfer(
+        CpiContext::new(
+            ctx.system_program.to_account_info(),
+            system_program::Transfer {
+                from: ctx.payer.to_account_info(),
+                to: ctx.recipient.to_account_info(),
+            },
+        ),
+        amount,
+    )?;
+
+    Ok(())
+}
+
 /** Swap token handler */
 pub fn swap_token_handler(ctx: Context<SwapInstructionParams>, amount: u64) -> Result<()> {
     let pool: &Account<BasicLiquidityPool> = &ctx.accounts.pool;
     let pool_key = &pool.key();
     // Transfer SOL native from payer to liquidity pool
-    anchor_lang::solana_program::system_instruction::transfer(
-        &ctx.accounts.sender.key(),
-        pool_key,
+    system_program::transfer(
+        CpiContext::new(
+            ctx.accounts.system_program.to_account_info(),
+            system_program::Transfer {
+                from: ctx.accounts.sender.to_account_info(),
+                to: ctx.accounts.pool.to_account_info(),
+            },
+        ),
         amount,
-    );
+    )?;
+
     let pool_seeds = &[
         POOL_LIQUIDITY_PREFIX.as_ref(),
         pool_key.as_ref(),

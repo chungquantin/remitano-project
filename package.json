@@ -2,8 +2,8 @@
   "scripts": {
     "test": "anchor test --skip-lint",
     "test:detach": "anchor test --skip-lint --skip-build --skip-deploy --skip-local-validator",
-    "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
-    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
+    "lint:fix": "prettier */*.js \"*/**/*{.js,.tsx,.ts}\" -w",
+    "lint": "prettier */*.js \"*/**/*{.js,.tsx,.ts}\" --check",
     "prog:build": "anchor build"
   },
   "workspaces": {
