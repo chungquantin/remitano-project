@@ -2,6 +2,14 @@ import { Keypair } from "@solana/web3.js";
 
 /* accountFundLiquidity: tEUZ4FqdiwQrwWcUw9B2HNEb7Dq3wuVNkU2GErZsWbd */
 export const getTestAccount = () => ({
+  anchorWallet: Keypair.fromSecretKey(
+    new Uint8Array([
+      46, 243, 16, 45, 167, 113, 21, 77, 170, 104, 149, 240, 171, 136, 66, 186, 52,
+  180, 20, 214, 82, 146, 254, 18, 151, 231, 248, 107, 238, 204, 166, 195, 162,
+  203, 18, 46, 89, 179, 166, 83, 38, 87, 27, 137, 110, 216, 121, 13, 20, 99, 40,
+  183, 170, 84, 136, 65, 85, 173, 167, 126, 74, 137, 244, 210
+    ])
+  ),
   accountFundLiquidity: Keypair.fromSecretKey(
     new Uint8Array([
       24, 118, 235, 108, 32, 152, 159, 142, 173, 235, 192, 247, 63, 24, 24, 105,

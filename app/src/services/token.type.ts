@@ -3,28 +3,28 @@ import * as borsh from '@project-serum/borsh';
 import { PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
 
-class InitializeAccount {
+interface InitializeAccount {
     instruction: number;
 }
 
-class InitializeMint {
+interface InitializeMint {
     instruction: number;
     decimals: number;
     mintAuthority: PublicKey;
     freezeAuthority?: PublicKey;
 }
 
-class MintRequest {
+interface MintRequest {
     instruction: number;
     amount: BN;
 }
 
-class TransferRequest {
+interface TransferRequest {
     instruction: number;
     amount: BN;
 }
 
-class TransferCheckedRequest {
+interface TransferCheckedRequest {
     instruction: number;
     amount: BN;
     decimals: number;

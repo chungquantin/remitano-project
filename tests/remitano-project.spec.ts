@@ -4,25 +4,21 @@ import { Program } from "@coral-xyz/anchor";
 import { RemitanoProject } from "../target/types/remitano_project";
 import { anchorProvider, remitanoService } from "./helpers";
 import {
-  Keypair,
+  Connection,
   LAMPORTS_PER_SOL,
   PublicKey,
-  SystemProgram,
-  Transaction,
+  clusterApiUrl,
 } from "@solana/web3.js";
 import { TokenProgramService } from "./services/token-program.service";
 import { BN } from "bn.js";
 import { getTestAccount } from "./constants";
-import {
-  ACCOUNT_SIZE,
-  getMinimumBalanceForRentExemptAccount,
-} from "@solana/spl-token";
 import RemitanoService from "./services/remitano.service";
 
 // Configure the client to use the local cluster.
-anchor.setProvider(anchor.AnchorProvider.env());
+const connection = new Connection(clusterApiUrl("testnet"));
+const wallet = new anchor.Wallet(getTestAccount().anchorWallet);
+anchor.setProvider(new anchor.AnchorProvider(connection, wallet, {}));
 const program = anchor.workspace.RemitanoProject as Program<RemitanoProject>;
-const connection = anchorProvider.connection;
 const testAccount = getTestAccount().accountFundLiquidity;
 let poolAddress: PublicKey | undefined = null;
 
