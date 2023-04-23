@@ -23,6 +23,18 @@ The implementation steps are covered in the below section
 
 ## Submission Checklist
 
+- [x] Create a new token on Solana testnet, for example, MOVE token.
+* Address of new token: `CM2Tb1iNhLsyPRaq43tFNSaQMW7N7Qx2R6ZypacCqM7S`
+* Mint authority: `BxUeMg5etjmiDX25gbGi2pn1MyzkcQx3ZCCiUifTUhyj`
+* Supply: `10,030,000,000` (decimals: 9)
+
+- [x] Create a UI to swap or create a script to execute to send swap transaction to Solana testnet
+* Deployed URL: https://remitano-project.netlify.app/
+<img width="1440" alt="Screen Shot 2023-04-23 at 07 48 22" src="https://user-images.githubusercontent.com/56880684/233837922-cbda186c-0d4f-4ab0-a15a-c2acc2fbf3df.png">
+
+- [x] Create a smart contract to swap SOL to MOVE token, for each SOL swapped we will receive 10 MOVE (the price is a constant).
+* Link to smart contract: https://github.com/chungquantin/remitano-project/blob/master/programs/remitano-project/src/lib.rs
+
 - [x] Smart contract have to be Solana testnet
 
 * Smart contract address: `Cb95wqzowAjpuRi2yRoo9agiko6c5g3eTAWammsWwC1h`
@@ -31,8 +43,6 @@ The implementation steps are covered in the below section
 ## Implementation
 
 ### Create new token
-
-Address of new token:
 
 ```
 3trVWdP5LcofWPB6QzEzJjiMd3pwTNmLZRzijfJjWsV1
